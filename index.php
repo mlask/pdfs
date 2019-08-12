@@ -24,9 +24,6 @@ class pdfs
 		if (isset($url['query']))
 			parse_str($url['query'], $this->api_query);
 		
-		// sprawdzenie dostępu do modułu (tylko z określonych adresów IP)
-		// $this->_access();
-		
 		// sprawdzenie requestu i dodanie wymaganych nagłówków
 		$this->_headers();
 		
@@ -69,25 +66,6 @@ class pdfs
 		if ($defaults !== null)
 			$output = $defaults;
 		return array_merge($output, is_array($input) ? $input : []);
-	}
-	
-	private function _access ()
-	{
-		$allowed_ips = ['::1', '127.0.0.1', '217.149.242.204' /* app.dmsi.pl */, '83.13.70.5' /* dmsi orange */, '83.13.70.6' /* dmsi orange */, '163.172.163.7' /* dev.cafeoffice.net */];
-		$allowed = false;
-		foreach ($allowed_ips as $_ip)
-		{
-			if ((isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR']) === $_ip)
-			{
-				$allowed = true;
-				break;
-			}
-		}
-		if (!$allowed)
-		{
-			header('Status: 403 Forbidden');
-			die('<h1>403 Forbidden</h1>');
-		}
 	}
 	
 	private function _headers ()
