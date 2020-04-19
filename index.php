@@ -1,5 +1,5 @@
 <?php
-class pdfs
+new class
 {
 	const DATA_DIR = '/data';
 	const WKHTMLTOPDF_BIN = '/usr/local/bin/wkhtmltopdf';
@@ -241,6 +241,4 @@ class pdfs
 			header('Status: 403 Forbidden');
 		exit;
 	}
-}
-
-new pdfs;
+};
