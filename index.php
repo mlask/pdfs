@@ -122,10 +122,22 @@ new class
 				$file_temp = [];
 				
 				// zapisanie danych wejściowych do pliku
-				if ($input['html'] !== false && strlen($input['html']) > 0)
+				if ($input['html'] !== false)
 				{
-					file_put_contents(sprintf($file_template, 'content'), $input['html']);
-					$file_temp['content'] = sprintf($file_template, 'content');
+					if (is_array($input['html']) && count($input['html']) > 0)
+					{
+						$file_temp['content'] = [];
+						foreach ($input['html'] as $_cidx => $_content)
+						{
+							file_put_contents(sprintf($file_template, sprintf('content%02d', $_cidx)), $_content);
+							$file_temp['content'][] = sprintf($file_template, sprintf('content%02d', $_cidx));
+						}
+					}
+					elseif (strlen($input['html']) > 0)
+					{
+						file_put_contents(sprintf($file_template, 'content'), $input['html']);
+						$file_temp['content'] = sprintf($file_template, 'content');
+					}
 				}
 				if ($input['header'] !== false && strlen($input['header']) > 0)
 				{
@@ -143,7 +155,7 @@ new class
 				// wykonanie procesu wkhtmltopdf (w tle)
 				if (isset($file_temp['content']))
 				{
-					$pid = trim(shell_exec(self::WKHTMLTOPDF_BIN . ' ' . implode(' ', $args) . ' ' . $file_temp['content'] . ' ' . self::DATA_DIR . '/' . $pdf_token . '.pdf >/dev/null 2>&1 & echo $!'));
+					$pid = trim(shell_exec(self::WKHTMLTOPDF_BIN . ' ' . implode(' ', $args) . ' ' . (is_array($file_temp['content']) ? implode(' ', $file_temp['content']) : $file_temp['content']) . ' ' . self::DATA_DIR . '/' . $pdf_token . '.pdf >/dev/null 2>&1 & echo $!'));
 					if (posix_kill($pid, 0))
 					{
 						// zapisanie metadanych
@@ -158,7 +170,15 @@ new class
 					{
 						// usunięcie plików tymczasowych
 						foreach ($file_temp as $_tmp)
-							unlink($_tmp);
+						{
+							if (is_array($_tmp))
+							{
+								foreach ($_tmp as $_tmp_item)
+									unlink($_tmp_item);
+							}
+							else
+								unlink($_tmp);
+						}
 						
 						// zwrócenie statusu (błąd generowania)
 						$this->api_status = 3;
